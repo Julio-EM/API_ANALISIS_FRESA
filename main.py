@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, Request
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base
@@ -8,6 +9,24 @@ from modelos import EstadosResponse
 
 
 app = FastAPI()
+
+@app.middleware("http")
+async def allow_http_for_devices(request: Request, call_next):
+    # Si la petición es HTTPS, continuar normal
+    if request.url.scheme == "https":
+        response = await call_next(request)
+        return response
+
+    # Si es HTTP (no segura)
+    # Permitimos específicamente el endpoint /MEDICIONES
+    if request.url.path == "/MEDICIONES" and request.method == "POST":
+        print("⚠️  Petición HTTP permitida desde dispositivo SIM800L")
+        response = await call_next(request)
+        return response
+
+    # Para todo lo demás, redirigir a HTTPS
+    https_url = request.url.replace(scheme="https")
+    return RedirectResponse(url=https_url)
 
 def get_db():
     db = SessionLocal()
