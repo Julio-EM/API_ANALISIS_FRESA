@@ -9,7 +9,7 @@ from modelos import EstadosResponse
 
 
 app = FastAPI()
-
+"""
 @app.middleware("http")
 async def allow_http_for_devices(request: Request, call_next):
     # Si la petición es HTTPS, continuar normal
@@ -27,7 +27,8 @@ async def allow_http_for_devices(request: Request, call_next):
     # Para todo lo demás, redirigir a HTTPS
     https_url = request.url.replace(scheme="https")
     return RedirectResponse(url=https_url)
-
+"""
+    
 def get_db():
     db = SessionLocal()
     try:
